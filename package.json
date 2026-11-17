@@ -1,0 +1,15 @@
+{
+  "name": "file-sharing-system",
+  "version": "1.0.0",
+  "description": "MongoDB-Based File Sharing System (MERN)",
+  "scripts": {
+    "start:backend": "node backend/server.js",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "seed": "node seed-demo-data.js",
+    "test:backend": "node backend/test-api.js"
+  },
+  "author": "Student Developer",
+  "license": "MIT"
+}

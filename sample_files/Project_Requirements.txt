@@ -1,0 +1,11 @@
+BTech Computer Science Final Project
+Project: Secure MongoDB File Sharing System (MERN Stack)
+Author: Student Developer
+Date: November 2026
+
+1. Architecture Overview:
+- React + Vite + Tailwind CSS Frontend
+- Node.js + Express.js Backend
+- MongoDB Atlas / Local MongoDB with Mongoose Schemas
+- Multer for local disk storage (never binary in DB)
+- JWT + Bcrypt for Authentication and Link Encryption
