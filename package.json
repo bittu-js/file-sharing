@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "MongoDB-Based File Sharing System (MERN)",
   "scripts": {
+    "start": "node backend/server.js",
     "start:backend": "node backend/server.js",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
