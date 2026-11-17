@@ -37,6 +37,42 @@ const fileRequestSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    submissions: [
+      {
+        file: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'File'
+        },
+        originalName: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        fileSize: {
+          type: Number,
+          required: true
+        },
+        fileType: {
+          type: String,
+          required: true
+        },
+        uploaderName: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        uploaderEmail: {
+          type: String,
+          required: true,
+          trim: true,
+          lowercase: true
+        },
+        uploadedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

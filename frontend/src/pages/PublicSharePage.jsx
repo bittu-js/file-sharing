@@ -81,7 +81,6 @@ const PublicSharePage = () => {
         prev ? { ...prev, downloadCount: (prev.downloadCount || 0) + 1 } : prev
       );
     } catch (err) {
-      // If response is blob containing JSON error
       if (err.response?.data instanceof Blob) {
         try {
           const text = await err.response.data.text();
@@ -104,14 +103,18 @@ const PublicSharePage = () => {
 
     try {
       const response = await api.post(
-        `/shares/${token}/preview`,
+        `/shares/${token}/download`,
         { password: password || undefined },
         { responseType: 'blob' }
       );
 
-      const blobType = shareData?.fileType || 'application/octet-stream';
-      const fileBlob = new Blob([response.data], { type: blobType });
-      const url = window.URL.createObjectURL(fileBlob);
+      const isPdf =
+        shareData.fileType?.includes('pdf') ||
+        shareData.fileName?.toLowerCase().endsWith('.pdf');
+      const blobType = shareData.fileType || (isPdf ? 'application/pdf' : 'image/png');
+      const blob = new Blob([response.data], { type: blobType });
+      const url = window.URL.createObjectURL(blob);
+
       setPreviewBlobUrl(url);
       setPreviewOpen(true);
     } catch (err) {
@@ -119,12 +122,12 @@ const PublicSharePage = () => {
         try {
           const text = await err.response.data.text();
           const parsed = JSON.parse(text);
-          setDownloadError(parsed.message || 'Incorrect password to preview.');
+          setDownloadError(parsed.message || 'Incorrect password to preview file.');
         } catch {
-          setDownloadError('Incorrect password.');
+          setDownloadError('Password required to preview file.');
         }
       } else {
-        setDownloadError('Failed to load preview.');
+        setDownloadError(err.response?.data?.message || 'Preview authorization failed.');
       }
     } finally {
       setPreviewLoading(false);
@@ -145,10 +148,10 @@ const PublicSharePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-        <div className="bg-white border border-border rounded-lg p-8 max-w-sm w-full text-center shadow-xs">
-          <Loader2 className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-text-secondary">Verifying shared link...</p>
+      <div className="min-h-screen bg-canvas-light dark:bg-canvas-dark flex items-center justify-center p-4">
+        <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md p-8 max-w-sm w-full text-center shadow-panel">
+          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-accent" />
+          <p className="text-xs text-secondary-light dark:text-secondary-dark font-mono">Verifying shared link...</p>
         </div>
       </div>
     );
@@ -156,21 +159,21 @@ const PublicSharePage = () => {
 
   if (error || !shareData) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-        <div className="bg-white border border-border rounded-lg p-8 max-w-sm w-full text-center shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 mx-auto flex items-center justify-center text-rose-600 mb-3">
+      <div className="min-h-screen bg-canvas-light dark:bg-canvas-dark flex items-center justify-center p-4">
+        <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md p-8 max-w-sm w-full text-center shadow-panel">
+          <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 mx-auto flex items-center justify-center text-rose-600 dark:text-rose-400 mb-3">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-sm font-semibold text-text-primary">
+          <h2 className="text-sm font-semibold text-primary-light dark:text-primary-dark">
             Link Unavailable
           </h2>
-          <p className="text-xs text-text-muted mt-1.5 leading-relaxed">
+          <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1.5 leading-relaxed">
             {error || 'This link may have expired or was deactivated by the sender.'}
           </p>
-          <div className="mt-6 pt-4 border-t border-border">
+          <div className="mt-6 pt-4 border-t border-line-light dark:border-line-dark">
             <a
               href="/login"
-              className="text-xs font-medium text-brand-600 hover:underline"
+              className="text-xs font-medium text-accent hover:underline font-mono"
             >
               Go to VaultDrop Home
             </a>
@@ -181,80 +184,76 @@ const PublicSharePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between items-center p-4">
+    <div className="min-h-screen bg-canvas-light dark:bg-canvas-dark flex flex-col justify-between items-center p-4 select-none">
       {/* Top Brand Logo */}
-      <div className="pt-8">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-brand-500 text-white flex items-center justify-center font-semibold text-xs shadow-xs">
-            <svg className="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-            </svg>
-          </div>
-          <span className="font-semibold text-sm tracking-tight text-text-primary">
-            VaultDrop
-          </span>
+      <div className="pt-8 flex items-center gap-2">
+        <div className="w-7 h-7 rounded-sm bg-primary-light dark:bg-primary-dark text-white dark:text-black flex items-center justify-center font-bold text-xs tracking-tight">
+          VD
         </div>
+        <span className="font-semibold text-xs tracking-tight text-primary-light dark:text-primary-dark">
+          VaultDrop Share
+        </span>
       </div>
 
       {/* Main File Card */}
       <div className="w-full max-w-md my-8">
-        <div className="bg-white border border-border rounded-lg p-6 shadow-2xs">
+        <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md p-6 shadow-panel">
           {/* File Header */}
-          <div className="flex items-start gap-3.5 pb-4 border-b border-border">
-            <div className="w-12 h-12 rounded-lg bg-surface border border-border flex items-center justify-center flex-shrink-0">
+          <div className="flex items-start gap-3.5 pb-4 border-b border-line-light dark:border-line-dark">
+            <div className="w-12 h-12 rounded-xs bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark flex items-center justify-center flex-shrink-0">
               {getFileIcon(shareData.fileType, shareData.fileName, 'w-6 h-6')}
             </div>
             <div className="overflow-hidden">
-              <h1 className="text-sm font-semibold text-text-primary break-all">
+              <h1 className="text-sm font-semibold text-primary-light dark:text-primary-dark break-all">
                 {shareData.fileName}
               </h1>
-              <p className="text-xs text-text-secondary mt-0.5">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-mono mt-0.5">
                 {formatBytes(shareData.fileSize)}
               </p>
             </div>
           </div>
 
           {/* Details & Badges */}
-          <div className="py-4 space-y-2.5 text-xs text-text-secondary">
+          <div className="py-4 space-y-2.5 text-xs text-secondary-light dark:text-secondary-dark">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-text-muted">
+              <span className="flex items-center gap-1.5 text-tertiary-light dark:text-tertiary-dark">
                 <User className="w-3.5 h-3.5" /> Shared by
               </span>
-              <span className="font-medium text-text-primary">
+              <span className="font-medium text-primary-light dark:text-primary-dark">
                 {shareData.sharedBy}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-text-muted">
+              <span className="flex items-center gap-1.5 text-tertiary-light dark:text-tertiary-dark">
                 <Calendar className="w-3.5 h-3.5" /> Shared date
               </span>
-              <span className="text-text-primary">
+              <span className="text-primary-light dark:text-primary-dark font-mono text-[11px]">
                 {formatDate(shareData.createdAt)}
               </span>
             </div>
 
             {shareData.expiresAt && (
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-text-muted">
+                <span className="flex items-center gap-1.5 text-tertiary-light dark:text-tertiary-dark">
                   <Clock className="w-3.5 h-3.5" /> Expires
                 </span>
-                <span className="text-text-primary font-medium">
+                <span className="text-primary-light dark:text-primary-dark font-mono text-[11px] font-medium">
                   {formatDate(shareData.expiresAt)}
                 </span>
               </div>
             )}
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-text-muted">
-                <ShieldCheck className="w-3.5 h-3.5" /> Link security
+              <span className="flex items-center gap-1.5 text-tertiary-light dark:text-tertiary-dark">
+                <ShieldCheck className="w-3.5 h-3.5" /> Security
               </span>
               {shareData.isPasswordProtected ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-xs border border-amber-200 dark:border-amber-800">
                   <Lock className="w-2.5 h-2.5" /> Password Protected
                 </span>
               ) : (
-                <span className="inline-flex items-center text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
+                <span className="inline-flex items-center text-[10px] font-mono text-secondary-light dark:text-secondary-dark bg-subtle-light dark:bg-subtle-dark px-2 py-0.5 rounded-xs border border-line-light dark:border-line-dark">
                   Public Direct
                 </span>
               )}
@@ -263,7 +262,7 @@ const PublicSharePage = () => {
 
           {/* Error Banner */}
           {downloadError && (
-            <div className="mb-4 flex items-start gap-2 p-3 bg-rose-50 border border-rose-200 rounded-md text-xs text-rose-700">
+            <div className="mb-4 flex items-start gap-2 p-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xs text-xs text-rose-600 dark:text-rose-400">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{downloadError}</span>
             </div>
@@ -273,18 +272,18 @@ const PublicSharePage = () => {
           <form onSubmit={handleDownload} className="space-y-3 pt-2">
             {shareData.isPasswordProtected && (
               <div>
-                <label className="block text-xs font-medium text-text-primary mb-1.5">
+                <label className="block text-xs font-medium text-primary-light dark:text-primary-dark mb-1.5">
                   Enter Password to Access File
                 </label>
                 <div className="relative">
-                  <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-3.5 h-3.5 text-tertiary-light dark:text-tertiary-dark absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     placeholder="Enter link password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-xs pl-8 pr-3 py-2 bg-white border border-border rounded-md placeholder:text-text-muted text-text-primary focus:border-brand-500 focus:outline-none transition-colors"
+                    className="w-full text-xs pl-8 pr-3 py-2 bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs placeholder:text-tertiary-light dark:placeholder:text-tertiary-dark text-primary-light dark:text-primary-dark focus:border-accent focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -296,10 +295,10 @@ const PublicSharePage = () => {
                   type="button"
                   onClick={handleOpenPreview}
                   disabled={previewLoading || downloading}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-medium text-text-primary bg-surface hover:bg-surface-hover border border-border rounded-md transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-medium text-primary-light dark:text-primary-dark bg-subtle-light dark:bg-subtle-dark hover:bg-line-light dark:hover:bg-line-dark border border-line-light dark:border-line-dark rounded-xs transition-colors"
                 >
                   {previewLoading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-accent" />
                   ) : (
                     <Eye className="w-3.5 h-3.5" />
                   )}
@@ -310,7 +309,7 @@ const PublicSharePage = () => {
               <button
                 type="submit"
                 disabled={downloading || previewLoading}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-md transition-colors shadow-2xs"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-medium text-white dark:text-black bg-primary-light dark:bg-primary-dark hover:opacity-90 disabled:opacity-50 rounded-xs transition-opacity shadow-2xs"
               >
                 {downloading ? (
                   <>
@@ -330,23 +329,23 @@ const PublicSharePage = () => {
       </div>
 
       {/* Footer Branding */}
-      <footer className="pb-6 text-center text-xs text-text-muted">
+      <footer className="pb-6 text-center text-xs text-tertiary-light dark:text-tertiary-dark font-mono">
         <span>Shared securely via </span>
-        <strong className="text-text-primary font-semibold">VaultDrop</strong>
+        <strong className="text-primary-light dark:text-primary-dark font-semibold">VaultDrop</strong>
       </footer>
 
       {/* Inline Preview Modal for Public Share */}
       {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-          <div className="bg-white border border-border rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in duration-200">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-white">
-              <span className="text-xs font-semibold text-text-primary truncate">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+          <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md max-w-4xl w-full max-h-[90vh] flex flex-col shadow-panel overflow-hidden animate-in fade-in duration-200">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-line-light dark:border-line-dark bg-panel-light dark:bg-panel-dark">
+              <span className="text-xs font-semibold text-primary-light dark:text-primary-dark truncate">
                 {shareData.fileName}
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-md"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white dark:text-black bg-primary-light dark:bg-primary-dark hover:opacity-90 rounded-xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download</span>
@@ -357,26 +356,30 @@ const PublicSharePage = () => {
                     if (previewBlobUrl) window.URL.revokeObjectURL(previewBlobUrl);
                     setPreviewBlobUrl(null);
                   }}
-                  className="p-1.5 text-text-muted hover:text-text-primary rounded-md"
+                  className="p-1.5 text-tertiary-light dark:text-tertiary-dark hover:text-primary-light dark:hover:text-primary-dark rounded-xs"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto bg-neutral-100 flex items-center justify-center min-h-[400px] p-4">
+            <div className="flex-1 overflow-auto bg-subtle-light/70 dark:bg-canvas-dark flex items-center justify-center min-h-[400px] p-4">
               {isImage && previewBlobUrl ? (
-                <img
-                  src={previewBlobUrl}
-                  alt={shareData.fileName}
-                  className="max-h-[65vh] max-w-full object-contain rounded border border-neutral-300 shadow-xs bg-white"
-                />
+                <div className="bg-panel-light dark:bg-panel-dark rounded-xs border border-line-light dark:border-line-dark p-2">
+                  <img
+                    src={previewBlobUrl}
+                    alt={shareData.fileName}
+                    className="max-h-[65vh] max-w-full object-contain rounded-xs"
+                  />
+                </div>
               ) : isPdf && previewBlobUrl ? (
-                <iframe
-                  src={`${previewBlobUrl}#toolbar=1`}
-                  title={shareData.fileName}
-                  className="w-full h-[550px] border-none bg-white rounded shadow-xs"
-                />
+                <div className="w-full h-full min-h-[550px] bg-panel-light dark:bg-panel-dark rounded-xs border border-line-light dark:border-line-dark overflow-hidden">
+                  <iframe
+                    src={`${previewBlobUrl}#toolbar=1`}
+                    title={shareData.fileName}
+                    className="w-full h-[550px] border-none"
+                  />
+                </div>
               ) : null}
             </div>
           </div>

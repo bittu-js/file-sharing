@@ -7,7 +7,8 @@ const {
   getMyFileRequests,
   revokeFileRequest,
   getPublicFileRequest,
-  uploadToPublicFileRequest
+  uploadToPublicFileRequest,
+  getFileRequestSubmissions
 } = require('../controllers/fileRequestController');
 
 // Public file request portal endpoints
@@ -18,6 +19,7 @@ router.post('/public/:token/upload', upload.array('files', 15), uploadToPublicFi
 router.use(protect);
 router.post('/', createFileRequest);
 router.get('/', getMyFileRequests);
+router.get('/:id/submissions', getFileRequestSubmissions);
 router.delete('/:id', revokeFileRequest);
 
 module.exports = router;

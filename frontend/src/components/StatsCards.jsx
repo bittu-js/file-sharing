@@ -37,21 +37,21 @@ const StatsCards = ({ stats }) => {
         return (
           <div
             key={index}
-            className="bg-white border border-border rounded-lg p-4 flex flex-col justify-between transition-colors hover:border-neutral-300"
+            className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-xs p-4 flex flex-col justify-between transition-colors shadow-2xs"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-text-secondary">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
                 {card.title}
               </span>
-              <div className="w-7 h-7 rounded bg-surface flex items-center justify-center text-text-muted">
+              <div className="w-7 h-7 rounded-xs bg-subtle-light dark:bg-subtle-dark flex items-center justify-center text-tertiary-light dark:text-tertiary-dark">
                 <Icon className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-semibold tracking-tight text-text-primary">
+              <span className="text-xl font-bold font-mono tracking-tight text-primary-light dark:text-primary-dark">
                 {card.value}
               </span>
-              <p className="text-[11px] text-text-muted mt-0.5">
+              <p className="text-[10px] text-tertiary-light dark:text-tertiary-dark mt-0.5 font-mono">
                 {card.description}
               </p>
             </div>

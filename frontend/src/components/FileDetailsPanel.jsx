@@ -342,6 +342,49 @@ const FileDetailsPanel = ({
               </div>
             </div>
 
+            {/* Uploader Information (If uploaded via File Request) */}
+            {(file.uploaderName || file.uploaderEmail || file.fileRequest) && (
+              <div className="space-y-2 pt-2 border-t border-line-light dark:border-line-dark">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-semibold tracking-wider uppercase text-tertiary-light dark:text-tertiary-dark font-mono">
+                    FILE REQUEST UPLOADER
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-xs bg-accent/10 text-accent font-medium">
+                    Requested
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-sm bg-subtle-light/60 dark:bg-subtle-dark/60 border border-line-light dark:border-line-dark space-y-1.5 text-[11px]">
+                  {file.uploaderName && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
+                        <Users className="w-3 h-3 text-tertiary-light dark:text-tertiary-dark" />
+                        Uploader:
+                      </span>
+                      <span className="font-medium text-primary-light dark:text-primary-dark">
+                        {file.uploaderName}
+                      </span>
+                    </div>
+                  )}
+                  {file.uploaderEmail && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-secondary-light dark:text-secondary-dark">Email:</span>
+                      <a
+                        href={`mailto:${file.uploaderEmail}`}
+                        className="font-mono text-accent hover:underline truncate max-w-[170px]"
+                        title={file.uploaderEmail}
+                      >
+                        {file.uploaderEmail}
+                      </a>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-[10px] text-tertiary-light dark:text-tertiary-dark font-mono pt-0.5 border-t border-line-light/40 dark:border-line-dark/40">
+                    <span>Submitted:</span>
+                    <span>{formatDate(file.uploadDate)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* SHA-256 Checksum */}
             {file.hash && (
               <div className="space-y-1.5 pt-2">

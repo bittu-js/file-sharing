@@ -106,7 +106,6 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
     setError('');
 
     try {
-      // Find share document or revoke by token/id
       const sharesRes = await api.get('/shares');
       const shareDoc = sharesRes.data.shares?.find(
         (s) => s.shareToken === activeShare.shareToken
@@ -127,19 +126,19 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-      <div className="bg-white border border-border rounded-lg max-w-md w-full shadow-lg overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-black/60">
+      <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md max-w-md w-full shadow-panel overflow-hidden animate-in fade-in duration-200">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-line-light dark:border-line-dark">
           <div className="flex items-center gap-2">
-            <Share2 className="w-4 h-4 text-brand-600" />
-            <h2 className="text-sm font-semibold text-text-primary">
+            <Share2 className="w-4 h-4 text-blue-500" />
+            <h2 className="text-sm font-semibold text-primary-light dark:text-primary-dark">
               Share File Link
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-text-muted hover:text-text-primary p-1 rounded-md transition-colors"
+            className="text-tertiary-light dark:text-tertiary-dark hover:text-primary-light dark:hover:text-primary-dark p-1 rounded-xs transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -148,18 +147,18 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
         {/* Modal Body */}
         <div className="p-5 space-y-4">
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-rose-50 border border-rose-200 rounded-md text-xs text-rose-700">
+            <div className="flex items-start gap-2 p-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xs text-xs text-rose-600 dark:text-rose-400">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Target File Info */}
-          <div className="p-3 bg-surface border border-border rounded-md text-xs">
-            <p className="font-semibold text-text-primary truncate">
+          <div className="p-3 bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs text-xs">
+            <p className="font-semibold text-primary-light dark:text-primary-dark truncate">
               {file.originalName}
             </p>
-            <p className="text-[11px] text-text-muted mt-0.5">
+            <p className="text-[11px] text-tertiary-light dark:text-tertiary-dark font-mono mt-0.5">
               {formatBytes(file.fileSize)}
             </p>
           </div>
@@ -167,7 +166,7 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
           {/* Existing Link Display */}
           {activeShare && (
             <div className="space-y-2">
-              <label className="text-xs font-medium text-text-secondary">
+              <label className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
                 Public Shareable Link
               </label>
               <div className="flex items-center gap-2">
@@ -175,15 +174,15 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
                   type="text"
                   readOnly
                   value={shareUrl}
-                  className="w-full text-xs font-mono bg-surface border border-border rounded-md px-3 py-2 text-text-primary focus:outline-none select-all"
+                  className="w-full text-xs font-mono bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs px-3 py-2 text-primary-light dark:text-primary-dark focus:outline-none select-all"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xs transition-colors flex-shrink-0 ${
                     copied
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-brand-600 text-white hover:bg-brand-700'
+                      : 'bg-primary-light dark:bg-primary-dark text-white dark:text-black hover:opacity-90'
                   }`}
                 >
                   {copied ? (
@@ -201,9 +200,9 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
               </div>
 
               {/* Status and download stats */}
-              <div className="flex items-center justify-between text-[11px] text-text-muted px-1 pt-1">
+              <div className="flex items-center justify-between text-[11px] text-tertiary-light dark:text-tertiary-dark font-mono px-1 pt-1">
                 <span>
-                  Downloads: <strong className="text-text-primary">{activeShare.downloadCount || 0}</strong>
+                  Downloads: <strong className="text-primary-light dark:text-primary-dark">{activeShare.downloadCount || 0}</strong>
                 </span>
                 <span>
                   {activeShare.expiresAt ? (
@@ -219,15 +218,15 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
           {/* Form for Configuring Sharing Options */}
           <form onSubmit={handleSaveShare} className="space-y-4 pt-1">
             {/* Password Protection */}
-            <div className="space-y-2 pt-2 border-t border-border">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-text-primary">
+            <div className="space-y-2 pt-2 border-t border-line-light dark:border-line-dark">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-primary-light dark:text-primary-dark">
                 <input
                   type="checkbox"
                   checked={passwordProtected}
                   onChange={(e) => setPasswordProtected(e.target.checked)}
-                  className="rounded border-border text-brand-600 focus:ring-0 focus:ring-offset-0"
+                  className="rounded-xs border-line-light dark:border-line-dark text-accent focus:ring-0"
                 />
-                <Lock className="w-3.5 h-3.5 text-text-muted" />
+                <Lock className="w-3.5 h-3.5 text-tertiary-light dark:text-tertiary-dark" />
                 <span>Require password to download</span>
               </label>
 
@@ -239,9 +238,9 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required={!activeShare?.isPasswordProtected}
-                    className="w-full text-xs bg-white border border-border rounded-md px-3 py-2 text-text-primary placeholder:text-text-muted focus:border-brand-500 focus:outline-none transition-colors"
+                    className="w-full text-xs bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs px-3 py-2 text-primary-light dark:text-primary-dark placeholder:text-tertiary-light dark:placeholder:text-tertiary-dark focus:border-accent focus:outline-none transition-colors"
                   />
-                  <p className="text-[11px] text-text-muted mt-1">
+                  <p className="text-[11px] text-tertiary-light dark:text-tertiary-dark font-mono mt-1">
                     Recipients must provide this password before downloading.
                   </p>
                 </div>
@@ -249,9 +248,9 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
             </div>
 
             {/* Expiration Settings */}
-            <div className="space-y-2 pt-2 border-t border-border">
-              <label className="flex items-center gap-2 text-xs font-medium text-text-primary">
-                <Calendar className="w-3.5 h-3.5 text-text-muted" />
+            <div className="space-y-2 pt-2 border-t border-line-light dark:border-line-dark">
+              <label className="flex items-center gap-2 text-xs font-medium text-primary-light dark:text-primary-dark">
+                <Calendar className="w-3.5 h-3.5 text-tertiary-light dark:text-tertiary-dark" />
                 <span>Link Expiration</span>
               </label>
 
@@ -266,10 +265,10 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
                     key={opt.id}
                     type="button"
                     onClick={() => setExpirationOption(opt.id)}
-                    className={`py-1.5 px-2 rounded-md border text-center transition-colors text-xs ${
+                    className={`py-1.5 px-2 rounded-xs border text-center transition-colors text-xs font-mono ${
                       expirationOption === opt.id
-                        ? 'border-brand-600 bg-brand-50 text-brand-600 font-medium'
-                        : 'border-border text-text-secondary hover:bg-surface'
+                        ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-white dark:text-black font-medium'
+                        : 'border-line-light dark:border-line-dark text-secondary-light dark:text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark'
                     }`}
                   >
                     {opt.label}
@@ -279,13 +278,13 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
             </div>
 
             {/* Actions */}
-            <div className="pt-3 border-t border-border flex items-center justify-between">
+            <div className="pt-3 border-t border-line-light dark:border-line-dark flex items-center justify-between">
               {activeShare ? (
                 <button
                   type="button"
                   onClick={handleRevokeShare}
                   disabled={loading}
-                  className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-md transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 px-2.5 py-1.5 rounded-xs transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Revoke Link</span>
@@ -298,14 +297,14 @@ const ShareModal = ({ file, isOpen, onClose, onShareUpdated }) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-3.5 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary border border-border rounded-md hover:bg-surface transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-medium text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark border border-line-light dark:border-line-dark rounded-xs hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-md transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white dark:text-black bg-primary-light dark:bg-primary-dark hover:opacity-90 disabled:opacity-50 rounded-xs transition-opacity"
                 >
                   {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{activeShare ? 'Update Link' : 'Generate Link'}</span>

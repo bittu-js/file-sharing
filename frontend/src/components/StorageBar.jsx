@@ -13,18 +13,18 @@ const StorageBar = ({ breakdown, totalBytes }) => {
   const total = totalBytes || 1; // avoid division by 0
 
   return (
-    <div className="bg-white border border-border rounded-lg p-5">
+    <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-xs p-5 shadow-2xs">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wider">
+        <h3 className="text-xs font-semibold text-primary-light dark:text-primary-dark uppercase tracking-wider font-mono">
           Storage Breakdown
         </h3>
-        <span className="text-xs text-text-secondary font-medium">
+        <span className="text-xs text-secondary-light dark:text-secondary-dark font-mono font-medium">
           {formatBytes(totalBytes)} used
         </span>
       </div>
 
       {/* Segmented bar */}
-      <div className="h-2 w-full bg-surface-hover rounded-full overflow-hidden flex">
+      <div className="h-2 w-full bg-subtle-light dark:bg-subtle-dark rounded-full overflow-hidden flex">
         {categories.map((cat) => {
           const bytes = breakdown?.[cat.key]?.bytes || 0;
           const percentage = (bytes / total) * 100;
@@ -39,22 +39,22 @@ const StorageBar = ({ breakdown, totalBytes }) => {
           );
         })}
         {totalBytes === 0 && (
-          <div className="w-full bg-neutral-100 h-full rounded-full" />
+          <div className="w-full bg-subtle-light dark:bg-subtle-dark h-full rounded-full" />
         )}
       </div>
 
       {/* Legend */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 pt-3 border-t border-border">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 pt-3 border-t border-line-light dark:border-line-dark">
         {categories.map((cat) => {
           const item = breakdown?.[cat.key] || { count: 0, bytes: 0 };
           return (
             <div key={cat.key} className="flex items-start gap-2">
               <span className={`w-2 h-2 rounded-full ${cat.color} mt-1 flex-shrink-0`} />
               <div>
-                <p className="text-[11px] font-medium text-text-primary leading-tight">
+                <p className="text-[11px] font-medium text-primary-light dark:text-primary-dark leading-tight">
                   {cat.label}
                 </p>
-                <p className="text-[11px] text-text-muted leading-tight mt-0.5">
+                <p className="text-[11px] text-tertiary-light dark:text-tertiary-dark font-mono leading-tight mt-0.5">
                   {formatBytes(item.bytes)} ({item.count})
                 </p>
               </div>

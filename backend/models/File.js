@@ -110,6 +110,23 @@ const fileSchema = new mongoose.Schema(
         }
       }
     ],
+    fileRequest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FileRequest',
+      default: null,
+      index: true
+    },
+    uploaderName: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    uploaderEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      default: null
+    },
     uploadDate: {
       type: Date,
       default: Date.now,

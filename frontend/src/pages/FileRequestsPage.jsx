@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Inbox, Plus, Copy, Check, Trash2, Folder, ExternalLink } from 'lucide-react';
+import { Inbox, Plus, Copy, Check, Trash2, Folder, ExternalLink, Eye, Users } from 'lucide-react';
 import Header from '../components/Header';
+import RequestSubmissionsModal from '../components/RequestSubmissionsModal';
 import { formatDate } from '../utils/formatters';
 import api from '../services/api';
 
 const FileRequestsPage = () => {
-  const { onOpenCreateRequest, refreshTrigger } = useOutletContext();
+  const { onOpenCreateRequest, onPreview, refreshTrigger } = useOutletContext();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
+  const [submissionsModalRequest, setSubmissionsModalRequest] = useState(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -117,8 +119,15 @@ const FileRequestsPage = () => {
                         </p>
                       </td>
 
-                      <td className="py-2 px-3 text-center font-mono font-bold text-primary-light dark:text-primary-dark">
-                        {req.submissionsCount || 0}
+                      <td className="py-2 px-3 text-center">
+                        <button
+                          onClick={() => setSubmissionsModalRequest(req)}
+                          title="Click to view submitted files and uploader identities"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-subtle-light dark:bg-subtle-dark hover:bg-accent/10 border border-line-light dark:border-line-dark hover:border-accent text-primary-light dark:text-primary-dark transition-colors font-mono font-semibold text-xs"
+                        >
+                          <Users className="w-3 h-3 text-accent" />
+                          <span>{req.submissionsCount || 0}</span>
+                        </button>
                       </td>
 
                       <td className="py-2 px-3 text-secondary-light dark:text-secondary-dark font-mono text-[11px]">
@@ -127,6 +136,14 @@ const FileRequestsPage = () => {
 
                       <td className="py-2 px-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setSubmissionsModalRequest(req)}
+                            title="View submissions log"
+                            className="flex items-center gap-1 px-2 py-0.5 text-xs font-mono rounded-xs border border-line-light dark:border-line-dark bg-panel-light dark:bg-panel-dark text-secondary-light dark:text-secondary-dark hover:text-accent hover:border-accent hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>View</span>
+                          </button>
                           <button
                             onClick={() => handleCopy(req)}
                             className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono rounded-xs border transition-colors ${
@@ -155,6 +172,16 @@ const FileRequestsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Submissions Detail Modal */}
+      {submissionsModalRequest && (
+        <RequestSubmissionsModal
+          isOpen={!!submissionsModalRequest}
+          request={submissionsModalRequest}
+          onClose={() => setSubmissionsModalRequest(null)}
+          onPreviewFile={onPreview}
+        />
+      )}
     </div>
   );
 };

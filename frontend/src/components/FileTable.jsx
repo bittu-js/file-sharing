@@ -304,6 +304,14 @@ const FileTable = ({
                             v{file.version}
                           </span>
                         )}
+                        {file.uploaderName && (
+                          <span
+                            title={`Uploaded via File Request by ${file.uploaderName} (${file.uploaderEmail || ''})`}
+                            className="px-1.5 py-0.2 rounded-xs text-[9px] font-mono bg-accent/10 text-accent border border-accent/20 flex-shrink-0 truncate max-w-[120px]"
+                          >
+                            from: {file.uploaderName.split(' ')[0]}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>

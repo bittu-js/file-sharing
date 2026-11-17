@@ -187,6 +187,12 @@ const FileGrid = ({
                       <span>{formatDate(file.uploadDate).split(',')[0]}</span>
                     </div>
 
+                    {file.uploaderName && (
+                      <p className="text-[10px] font-mono text-accent truncate mt-1" title={`Uploaded by ${file.uploaderName} (${file.uploaderEmail || ''})`}>
+                        from: {file.uploaderName}
+                      </p>
+                    )}
+
                     {file.tags && file.tags.length > 0 && (
                       <div className="flex gap-1 mt-1.5 overflow-hidden">
                         {file.tags.slice(0, 2).map((tag, i) => (

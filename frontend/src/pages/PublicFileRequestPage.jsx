@@ -11,10 +11,13 @@ const PublicFileRequestPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploaderName, setUploaderName] = useState('');
+  const [uploaderEmail, setUploaderEmail] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const [submissionReceipt, setSubmissionReceipt] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -46,13 +49,34 @@ const PublicFileRequestPage = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (selectedFiles.length === 0) return;
+
+    // Validate uploader credentials
+    const trimmedName = uploaderName.trim();
+    const trimmedEmail = uploaderEmail.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setError('Please enter your full name (minimum 2 characters).');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (selectedFiles.length === 0) {
+      setError('Please select at least one file to upload.');
+      return;
+    }
 
     setUploading(true);
     setProgress(0);
     setError('');
 
     const formData = new FormData();
+    formData.append('uploaderName', trimmedName);
+    formData.append('uploaderEmail', trimmedEmail);
     selectedFiles.forEach((file) => formData.append('files', file));
 
     try {
@@ -67,6 +91,12 @@ const PublicFileRequestPage = () => {
 
       if (res.data.success) {
         setSubmittedCount(selectedFiles.length);
+        setSubmissionReceipt({
+          name: trimmedName,
+          email: trimmedEmail,
+          count: selectedFiles.length,
+          timestamp: new Date()
+        });
         setSubmitted(true);
         setSelectedFiles([]);
       }
@@ -122,19 +152,49 @@ const PublicFileRequestPage = () => {
       <div className="w-full max-w-md my-8">
         <div className="bg-panel-light dark:bg-panel-dark border border-line-light dark:border-line-dark rounded-md p-6 shadow-panel">
           {submitted ? (
-            <div className="text-center py-6 space-y-3">
+            <div className="text-center py-6 space-y-4">
               <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h2 className="text-base font-semibold text-primary-light dark:text-primary-dark">
-                Files Submitted Successfully!
-              </h2>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark max-w-xs mx-auto">
-                {submittedCount} file(s) have been delivered securely to {requestInfo.requesterName}'s VaultDrop workspace.
-              </p>
+              <div>
+                <h2 className="text-base font-semibold text-primary-light dark:text-primary-dark">
+                  Files Submitted Successfully!
+                </h2>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1">
+                  Thank you, <strong className="text-primary-light dark:text-primary-dark">{submissionReceipt?.name}</strong>.
+                </p>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-0.5">
+                  {submittedCount} file(s) have been delivered securely to{' '}
+                  <span className="font-medium text-primary-light dark:text-primary-dark">{requestInfo.requesterName}</span>'s VaultDrop workspace.
+                </p>
+              </div>
+
+              {/* Receipt Summary */}
+              {submissionReceipt && (
+                <div className="bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs p-3 text-left space-y-1.5 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-secondary-light dark:text-secondary-dark font-mono text-[11px]">Uploader:</span>
+                    <span className="font-medium text-primary-light dark:text-primary-dark">{submissionReceipt.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-secondary-light dark:text-secondary-dark font-mono text-[11px]">Email:</span>
+                    <span className="font-mono text-primary-light dark:text-primary-dark">{submissionReceipt.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-secondary-light dark:text-secondary-dark font-mono text-[11px]">Delivered:</span>
+                    <span className="text-primary-light dark:text-primary-dark font-mono text-[11px]">
+                      {formatDate(submissionReceipt.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <button
-                onClick={() => setSubmitted(false)}
-                className="mt-4 px-3.5 py-1.5 text-xs font-medium text-white dark:text-black bg-primary-light dark:bg-primary-dark rounded-xs"
+                onClick={() => {
+                  setSubmitted(false);
+                  setSubmissionReceipt(null);
+                }}
+                className="mt-2 px-4 py-1.5 text-xs font-medium text-white dark:text-black bg-primary-light dark:bg-primary-dark hover:opacity-90 rounded-xs transition-opacity"
               >
                 Submit More Files
               </button>
@@ -166,10 +226,50 @@ const PublicFileRequestPage = () => {
               </div>
 
               {error && (
-                <div className="p-2 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xs text-xs text-rose-600 dark:text-rose-400">
+                <div className="p-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xs text-xs text-rose-600 dark:text-rose-400">
                   {error}
                 </div>
               )}
+
+              {/* UPLOADER IDENTIFICATION FORM */}
+              <div className="space-y-3 pt-1">
+                <div>
+                  <label className="block text-[11px] font-medium text-secondary-light dark:text-secondary-dark mb-1">
+                    Your Full Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={uploaderName}
+                    onChange={(e) => {
+                      setUploaderName(e.target.value);
+                      if (error) setError('');
+                    }}
+                    placeholder="e.g. Dr. Evelyn Reed"
+                    className="w-full text-xs px-3 py-2 bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs text-primary-light dark:text-primary-dark placeholder:text-tertiary-light dark:placeholder:text-tertiary-dark focus:outline-none focus:border-accent transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-secondary-light dark:text-secondary-dark mb-1">
+                    Your Email Address <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={uploaderEmail}
+                    onChange={(e) => {
+                      setUploaderEmail(e.target.value);
+                      if (error) setError('');
+                    }}
+                    placeholder="e.g. evelyn.reed@lab.org"
+                    className="w-full text-xs px-3 py-2 bg-subtle-light dark:bg-subtle-dark border border-line-light dark:border-line-dark rounded-xs text-primary-light dark:text-primary-dark placeholder:text-tertiary-light dark:placeholder:text-tertiary-dark focus:outline-none focus:border-accent transition-colors"
+                  />
+                  <p className="text-[10px] text-tertiary-light dark:text-tertiary-dark font-mono mt-1">
+                    No account required. Used by the requester to identify your submission.
+                  </p>
+                </div>
+              </div>
 
               {/* Upload Drop Zone */}
               <div
